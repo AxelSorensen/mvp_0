@@ -3,7 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
-const chatModel = new ChatOpenAI({model:'gpt-4-turbo'
+const chatModel = new ChatOpenAI({model:'gpt-4o'
 });
 
 const instruction = `Given the name and a short description of an invention, your job is to answer the two following questions:

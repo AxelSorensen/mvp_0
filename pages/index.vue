@@ -29,7 +29,7 @@ const pending = ref(false)
 
 async function submit(input) {
   pending.value = true
-  data.value = await $fetch('/api/hello', {
+  data.value = await $fetch('/api/llm', {
     method: 'POST',
     body: {
       "name": input.name,
