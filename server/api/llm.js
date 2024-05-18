@@ -1,9 +1,11 @@
 
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { StringOutputParser } from "@langchain/core/output_parsers";
+import * as dotenv from 'dotenv'
 
-const chatModel = new ChatOpenAI({model:'gpt-4o'
+dotenv.config()
+
+const llm = new ChatOpenAI({ model:'gpt-4o'
 });
 
 const instruction = `Given the name and a short description of an invention, your job is to answer the two following questions:
@@ -15,15 +17,12 @@ Q2: What problem(s) does it solve and why might this be more desirable than the 
 You may strictly only use 100 words, so keep it short
 `;
 
-
 const prompt = ChatPromptTemplate.fromMessages([
-  ["system", instruction],
-  ["user", "Name: {name} \n Description: {description}"],
+  ["system", "You are a helpful assistant that answers in 1 sentence, searches the web, and provides sources of where information is from"],
+  ["placeholder", "{chat_history}"],
+  ["human", "{input}"],
+  ["placeholder", "{agent_scratchpad}"],
 ]);
-
-const outputParser = new StringOutputParser();
-
-const llmChain = prompt.pipe(chatModel).pipe(outputParser);
 
 
 export default defineEventHandler(async (event) => {

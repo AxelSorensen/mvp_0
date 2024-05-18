@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center h-screen p-8">
+  <div class="flex flex-col items-center h-screen p-8 ">
     <h1 class="text-lg font-medium text-pu mb-4">AI Business Development</h1>
     <div class="flex flex-col gap-4 w-full h-full">
       <InputC label="Name" v-model="name" placeholder="The name of your product" />
@@ -8,15 +8,34 @@
         :class="{ 'animate-pulse': pending, 'pointer-events-none opacity-50': !name || !description }"
         @click="submit({ 'name': name, 'description': description })">{{ pending ?
         'Processing...' : 'Submit' }}</button>
-      <div class="h-full flex flex-col gap-1">
-        <label class="text-xs font-medium">Output:</label>
-        <div class="w-full bg-gray-100 rounded-md text-sm h-full p-2">
-          <p>{{ data.output }}</p>
+      <div class="h-full grid grid-cols-2 grid-rows-2 gap-4">
+        <div class=" flex gap-1 flex-col">
+          <label class="text-xs font-medium">Usecase:</label>
+          <div class="bg-gray-100 rounded-md text-sm p-2 flex-grow">
+            <p>{{ data.output }}</p>
+          </div>
+        </div>
+        <div class=" flex gap-1 flex-col">
+          <label class="text-xs font-medium">Market analysis:</label>
+          <div class="bg-gray-100 rounded-md text-sm p-2 flex-grow">
+            <p>{{ data.output }}</p>
+          </div>
+        </div>
+        <div class=" flex gap-1 flex-col">
+          <label class="text-xs font-medium">Patent landscape:</label>
+          <div class="bg-gray-100 rounded-md text-sm p-2 flex-grow">
+            <p>{{ data.output }}</p>
+          </div>
+        </div>
+        <div class="gap-1 flex flex-col">
+          <label class="text-xs font-medium">Summary:</label>
+          <div class="bg-gray-100 rounded-md text-sm p-2 flex-grow">
+            <p>{{ data.output }}</p>
+          </div>
         </div>
       </div>
+
     </div>
-
-
 
   </div>
 </template>
