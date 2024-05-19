@@ -13,16 +13,23 @@ import { AgentExecutor, createOpenAIToolsAgent } from "langchain/agents";
 const tools = [
   new ExaSearchResults({
     searchArgs: {
-      numResults: 5,
+      numResults: 1,
     },
     client: new Exa(process.env.EXASEARCH_API_KEY),
   }),
 ];
 
+const instruction = `Given a market, search the web and return only the market size.
+Example:
+Market: Outdoor Equipment
+Output: US$26bn
+`;
+
+
 const prompt = ChatPromptTemplate.fromMessages([
-  ["system", "You are a helpful assistant that answers in 3 sentences, searches the web, and provides sources of where information is from"],
+  ["system", instruction],
   ["placeholder", "{chat_history}"],
-  ["human", "{input}"],
+  ["human", "Market: {input}\n\nOutput: "],
   ["placeholder", "{agent_scratchpad}"],
 ]);
 
@@ -49,7 +56,7 @@ const agentExecutor = new AgentExecutor({
 });
 
 const result = await agentExecutor.invoke({
-  input: "What is the name of the first author of the Eevee annotation tool for natural language processing?",
+  input: "Outdoor Equipment",
 });
 
 console.log(result);
