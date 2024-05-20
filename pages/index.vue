@@ -1,31 +1,40 @@
 <template>
-  <div class="flex flex-col items-center h-screen p-8 ">
-    <h1 class="text-lg font-medium text-pu mb-4">AI Business Development</h1>
-    <div class="flex flex-col gap-4 w-full h-full">
+  <div class="grid grid-rows-[auto,1fr] items-center h-screen p-8">
+    <div class="flex flex-col w-full h-full gap-4">
       <!-- <InputC label="Name" v-model="name" placeholder="The name of your product" /> -->
-      <TextAreaC label="Description" rows="4" placeholder="A short description of your product" v-model="description" />
+      <h1 class="text-lg w-full text-center font-medium">AI Business Development</h1>
+      <div class="flex gap-1 flex-col justify-between">
+        <label class="text-xs text-gray-600">{{ label }}:</label>
+        <textarea type="text" class="bg-gray-100 p-2 rounded-md w-full text-sm" v-model="description"
+          placeholder="A short description of your idea" rows="4" />
+      </div>
       <button class="bg-purple-500 text-white rounded-md text-sm p-2 hover:bg-purple-400 mb-8"
         :class="{ 'animate-pulse': pending, 'pointer-events-none opacity-50': !description }"
         @click="submit({ 'description': description })">{{ pending ?
-        'Processing...' : 'Submit' }}</button>
-      <div class="h-full grid grid-cols-2 grid-rows-2 gap-4">
-        <div class=" flex gap-1 flex-col">
+          'Processing...' : 'Submit' }}</button>
+    </div>
+    <div class=" w-full h-full grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col custom-container gap-1 max-h-32 min-h-[2rem]">
           <label class="text-xs font-medium">Usecase:</label>
-          <div class="bg-gray-100 text-xs rounded-md p-2">
-            <p v-html="use_case"></p>
+
+          <div class="bg-gray-100 text-xs overflow-scroll rounded-md flex-grow p-2">
+            <p class="text-ellipsis" v-html="use_case"></p>
           </div>
+
         </div>
-        <div class=" flex gap-1 flex-col">
+        <div class="flex flex-col custom-container gap-1">
           <label class="text-xs font-medium">Market analysis:</label>
 
-          <div class="bg-gray-100 rounded-md text-xs p-2 gap-2 flex flex-col">
+          <div class="bg-gray-100 overflow-scroll rounded-md flex flex-col text-xs p-2 gap-2 flex-grow">
             <div class="flex gap-1">
-              <label>Relevant market: </label>
-              <div class="font-bold" v-if="market_analysis.relevant_market">
+              <label class="text-nowrap">Relevant market: </label>
+              <div class="font-bold truncate" v-if="market_analysis.relevant_market">
                 {{ market_analysis.relevant_market }}
               </div>
               <div class="text-gray-400" v-else>...</div>
             </div>
+
             <div class="flex gap-1">
               <label>Market size: </label>
               <div v-if="market_analysis.market_stats" class="font-bold">
@@ -33,7 +42,6 @@
                 <a target="_blank" :href="market_analysis.market_stats?.market_size?.source">🔗</a>
               </div>
               <div class="text-gray-400" v-else>...</div>
-
             </div>
             <div class="flex gap-1">
               <label>CAGR: </label>
@@ -42,7 +50,6 @@
                 <a target="_blank" :href="market_analysis.market_stats?.CAGR?.source">🔗</a>
               </div>
               <div class="text-gray-400" v-else>...</div>
-
             </div>
             <div class="flex flex-col gap-1">
               <label>Dominant actors: </label>
@@ -65,21 +72,27 @@
             </div>
 
           </div>
+
         </div>
-        <div class=" flex gap-1 flex-col">
+      </div>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col custom-container gap-1 max-h-[300px] min-h-[2rem]">
           <label class="text-xs font-medium">Patent landscape:</label>
-          <div class="bg-gray-100 rounded-md text-sm p-2">
+          <div class="bg-gray-100 overflow-scroll rounded-md text-sm p-2 flex-grow">
             <p>{{ }}</p>
           </div>
         </div>
-        <div class="gap-1 flex flex-col">
+        <div class="flex flex-col custom-container gap-1">
           <label class="text-xs font-medium">SWOT:</label>
-          <div class="bg-gray-100 rounded-md text-sm p-2">
-            <p>{{ }}</p>
+          <div class="rounded-md grid grid-rows-2 grid-cols-2 gap-4 custom-container">
+            <div class="bg-gray-100 rounded-md p-2 flex-grow flex flex-col overflow-scroll gap-1 "
+              v-for="category in swot_categories">
+              <p class="text-xs font-bold">{{ category }}</p>
+              <p class="text-xs" v-for="element in swot[category]">- {{ element }}</p>
+            </div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -91,44 +104,55 @@ const market_analysis = ref({
   dominant_actors: null,
   potential_customers: null,
 })
+
+const swot_categories = ['Strengths', 'Weaknesses', 'Opportunities', 'Threats']
 const use_case = ref('')
+const swot = ref('')
 // const name = ref('')
 const description = ref('')
 const pending = ref(false)
 
 async function submit(input) {
   pending.value = true
-  market_analysis.value.relevant_market = await $fetch('/api/market_analysis/relevant_market', {
+  market_analysis.value.relevant_market = await $fetch('/api/relevant_market', {
     method: 'POST',
     body: {
       "description": input.description
     }
   })
-  market_analysis.value.market_stats = await $fetch('/api/market_analysis/market_stats', {
+  market_analysis.value.market_stats = await $fetch('/api/market_stats', {
     method: 'POST',
     body: {
       "market": market_analysis.value.relevant_market
     }
   })
-  market_analysis.value.dominant_actors = await $fetch('/api/market_analysis/dominant_actors', {
+  market_analysis.value.dominant_actors = await $fetch('/api/dominant_actors', {
     method: 'POST',
     body: {
       "market": market_analysis.value.relevant_market
     }
   })
-  market_analysis.value.potential_customers = await $fetch('/api/market_analysis/potential_customers', {
+  market_analysis.value.potential_customers = await $fetch('/api/potential_customers', {
     method: 'POST',
     body: {
       "market": market_analysis.value.relevant_market,
       "idea": input.description
     }
   })
-  use_case.value = await $fetch('/api/market_analysis/use_case', {
+  use_case.value = await $fetch('/api/use_case', {
     method: 'POST',
     body: {
       "description": input.description,
     }
   })
+  // swot.value = await $fetch('/api/swot', {
+  //   method: 'POST',
+  //   body: {
+  //     "description": input.description,
+  //     "market_analysis": market_analysis.value,
+  //     "usecase": use_case.value
+  //   }
+  // })
   pending.value = false
   console.log('success')
 }

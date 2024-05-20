@@ -6,3 +6,23 @@ input, textarea {
   outline: None;
   resize: None;
 }
+
+.custom-container {
+  container-type:size;
+  height: 100%;
+  width: 100%;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 4px;
+  height: 100%;
+
+
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, .2);
+  border-radius: 6px;
+
+}

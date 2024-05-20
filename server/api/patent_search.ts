@@ -24,38 +24,30 @@ async function createAgent() {
     }),
   ];
   
-const instruction = `Given a market and a description of an idea, search the web and return the top 3 dominant actors and a link to each in json format.
+  const instruction = `Given a market, search the web and return only the market size and the source you got the number from.
 
-Market:  Outdoor recreation equipment
-Idea: A modular, customizable solar-powered battery pack system designed for outdoor enthusiasts. This system allows users to connect multiple battery packs together to increase capacity as needed. Each battery pack module is equipped with high-efficiency solar panels, fast-charging capabilities, and a robust, water-resistant design. The system also includes a smart management unit that optimizes charging and discharging rates, monitors the health of each module, and provides real-time data to a connected mobile app.
+Market: 
+Outdoor Equipment
 
 Output:
 json{{
-  "top_3": [
-    {{
-      "name": "EcoFlow",
-      "link": "https://www.ecoflow.com"
-    }},
-    {{
-      "name": "BLUETTI",
-      "link": "https://www.bluettipower.com/products/bluetti-ac300-b300-modular-power-system"
-    }},
-    {{
-      "name": "Goal Zero",
-      "link": "https://www.goalzero.com/shop/yeti-power-stations"
-    }}
-  ]
-}}
+  market_size: {{
+    value: US$26bn,
+    source:https://www.statista.com/outlook/cmo/toys-hobby/sports-equipment/outdoor-equipment/worldwide
+  }},
+  CAGR: {{
+    value: 5.8%,
+    source: https://www.businessresearchinsights.com/market-reports/outdoor-gear-equipment-market-105833
+  }}
+  }}
 `;
-
-
 
 const outputParser = new StringOutputParser();
 
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", instruction],
   ["placeholder", "{chat_history}"],
-  ["human", "Market: {market}\nIdea: {idea}\n\nOutput:\n\n"],
+  ["human", "Market: {input}\n\nOutput:\n\n"],
   ["placeholder", "{agent_scratchpad}"],
 ]);
 
@@ -98,8 +90,7 @@ export default defineEventHandler(async (event) => {
   const agentExecutor = await createAgent()
   try {
     const response = await agentExecutor.invoke({
-      market: body.market,
-      idea: body.idea
+      input: body.market
     });
     // console.log(response)
     return outputParser.parse(response.output)
