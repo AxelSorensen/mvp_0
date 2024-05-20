@@ -114,6 +114,12 @@ const pending = ref(false)
 
 async function submit(input) {
   pending.value = true
+  use_case.value = await $fetch('/api/use_case', {
+    method: 'POST',
+    body: {
+      "description": input.description,
+    }
+  })
   market_analysis.value.relevant_market = await $fetch('/api/relevant_market', {
     method: 'POST',
     body: {
@@ -139,12 +145,6 @@ async function submit(input) {
       "idea": input.description
     }
   })
-  use_case.value = await $fetch('/api/use_case', {
-    method: 'POST',
-    body: {
-      "description": input.description,
-    }
-  })
   // swot.value = await $fetch('/api/swot', {
   //   method: 'POST',
   //   body: {
@@ -154,6 +154,6 @@ async function submit(input) {
   //   }
   // })
   pending.value = false
-  console.log('success')
+  // console.log('success')
 }
 </script>
