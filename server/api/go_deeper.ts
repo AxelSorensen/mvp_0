@@ -4,15 +4,9 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
 
 const llm = new ChatOpenAI({model:'gpt-4o'
-, maxTokens: 200});
+, maxTokens: 400});
 
-const instruction = `Given a short description of an idea/patent/product, return a non-obvious relevant usecase. Put <b></b> html tags around as many words as you deem important.
-
-Description: EcoCharge is a portable, solar-powered battery pack for outdoor enthusiasts, offering high-capacity storage, fast charging, and a durable, water-resistant design.
-
-Output:
-EcoCharge is ideal for <b>wildlife photographers</b> who spend extended periods in remote areas. Its solar-powered, fast-charging capability <b>keeps cameras and drones operational</b>, while its durable, water-resistant design withstands harsh field conditions. This ensures <b>uninterrupted work</b>, capturing wildlife moments without worrying about power shortages.
-`;
+const instruction = `Given a high level description, go more in to depth about exactly how this usecase works, what are potential customers, what need is it solving and what are next steps. Add <b> html tags around important words in each description to make them stand out. Don't use markdown just plain text`;
 
 
 const prompt = ChatPromptTemplate.fromMessages([

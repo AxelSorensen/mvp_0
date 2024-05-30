@@ -7,6 +7,10 @@ input, textarea {
   resize: None;
 }
 
+b {
+  @apply font-semibold
+}
+
 .custom-container {
   container-type:size;
   height: 100%;
@@ -15,7 +19,7 @@ input, textarea {
 
 ::-webkit-scrollbar {
   -webkit-appearance: none;
-  width: 4px;
+  width: 5px;
   height: 100%;
 
 
