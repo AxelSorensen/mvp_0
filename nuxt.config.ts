@@ -3,6 +3,13 @@ export default defineNuxtConfig({
   devtools: {
     enabled: true,
   },
+  nitro: {
+    vercel: {
+      functions: {
+        maxDuration: 60,
+      },
+    },
+  },
   modules: ['nuxt-icon'],
   css: ['/globals.css'],
   postcss: {
