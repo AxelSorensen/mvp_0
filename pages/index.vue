@@ -23,13 +23,17 @@
             {{ usecase?.title }}</p>
         </div>
         <div class="text-ellipsis" v-html="usecase?.description"></div>
-        <div class="flex items-center gap-2">
+        <!-- <div class="flex items-center gap-2">
           <div class="w-2 h-2 rounded-full bg-purple-400" v-for="score in usecase?.novelty_score"></div>
-        </div>
+        </div> -->
       </div>
     </div>
     <div v-else class="w-full h-full flex flex-col gap-4 overflow-hidden">
       <div class="flex text-xs gap-2 items-center">
+        <div>
+          <Icon @click="page = null" name="heroicons:chevron-left-16-solid"
+            class="text-purple-500 hover:text-purple-600 cursor-pointer" size="1.5rem" />
+        </div>
         <div @click="page = idx"
           :class="{ 'bg-purple-100 text-purple-700 cursor-default': page == idx, 'bg-gray-100 hover:bg-gray-200 cursor-pointer': page != idx }"
           class="overflow-hidden  rounded-sm whitespace-nowrap text-ellipsis p-2"
@@ -45,12 +49,25 @@
             <div class="bg-gray-100 text-xs overflow-scroll rounded-md flex-grow p-2">
               <p class="text-ellipsis" v-html="use_case.usecases?.[page]?.description"></p>
             </div>
+            <div @click="elaborate" class="flex justify-end ">
+              <div class="flex group items-center gap-1 cursor-pointer">
+                <Icon name="heroicons:sparkles-solid" class="text-purple-500 group-hover:text-purple-600 "
+                  size=".8rem" />
+                <div class="text-xs font-bold text-purple-500 group-hover:text-purple-600">Elaborate</div>
+              </div>
 
+            </div>
           </div>
           <div class="flex flex-col custom-container gap-1">
-            <label class="text-xs font-medium">Market analysis:</label>
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-medium">Market analysis:</label>
+              <div @click="get_market_analysis"
+                class="text-xs cursor-pointer hover:bg-purple-200 bg-purple-100 text-purple-500 p-1 rounded-sm">Fetch
+              </div>
+            </div>
 
-            <div class="bg-gray-100 overflow-scroll rounded-md flex flex-col text-xs p-2 gap-2 flex-grow">
+            <div v-if="market_format == 'structured'"
+              class="bg-gray-100 overflow-scroll rounded-md flex flex-col text-xs p-2 gap-2 flex-grow">
               <div class="flex gap-1">
                 <label class="text-nowrap">Relevant market: </label>
                 <div class="font-bold truncate" v-if="market_analysis[page].relevant_market">
@@ -61,25 +78,25 @@
 
               <div class="flex gap-1">
                 <label>Market size: </label>
-                <div v-if="market_analysis.market_stats" class="font-bold">
-                  {{ market_analysis.market_stats.market_size?.value }}
-                  <a target="_blank" :href="market_analysis.market_stats?.market_size?.source">🔗</a>
+                <div v-if="market_analysis[page].market_stats" class="font-bold">
+                  {{ market_analysis[page].market_stats.market_size?.value }}
+                  <a target="_blank" :href="market_analysis[page].market_stats?.market_size?.source">🔗</a>
                 </div>
                 <div class="text-gray-400" v-else>...</div>
               </div>
               <div class="flex gap-1">
                 <label>CAGR: </label>
-                <div v-if="market_analysis.market_stats" class="font-bold">
-                  {{ market_analysis.market_stats?.CAGR?.value }}
-                  <a target="_blank" :href="market_analysis.market_stats?.CAGR?.source">🔗</a>
+                <div v-if="market_analysis[page].market_stats" class="font-bold">
+                  {{ market_analysis[page].market_stats?.CAGR?.value }}
+                  <a target="_blank" :href="market_analysis[page].market_stats?.CAGR?.source">🔗</a>
                 </div>
                 <div class="text-gray-400" v-else>...</div>
               </div>
               <div class="flex flex-col gap-1">
                 <label>Dominant actors: </label>
                 <a class="text-white bg-purple-500 p-1 rounded-sm hover:bg-purple-600"
-                  v-if="market_analysis.dominant_actors" :href="actor.link" target="_blank"
-                  v-for="   actor    in    market_analysis.dominant_actors.top_3   ">
+                  v-if="market_analysis[page].dominant_actors" :href="actor.link" target="_blank"
+                  v-for="   actor    in    market_analysis[page].dominant_actors.top_3   ">
                   {{ actor.name }}
                 </a>
                 <div class="text-gray-400" v-else>...</div>
@@ -87,32 +104,49 @@
               </div>
               <div class="flex flex-col gap-1">
                 <label>Potential customers: </label>
-                <div class="text-white bg-purple-500 p-1 rounded-sm" v-if="market_analysis.potential_customers"
-                  v-for="   group    in    market_analysis.potential_customers.top_3   ">
-                  {{ group.name }}
+                <div class="font-bold  rounded-sm" v-if="market_analysis[page].potential_customers"
+                  v-for="   group    in    market_analysis[page].potential_customers.top_3   ">
+                  - {{ group.name }}
                 </div>
                 <div class="text-gray-400" v-else>...</div>
 
               </div>
 
             </div>
-
+            <div v-else class="bg-gray-100 overflow-scroll rounded-md flex flex-col text-xs p-2 gap-2 flex-grow">
+              <div v-if="market_analysis[page].freeform">{{
+          market_analysis[page].freeform }}
+              </div>
+              <div v-else class="text-gray-400">Click 'Fetch' to retrieve data</div>
+            </div>
+            <div class="flex text-xs justify-evenly min-h-6 rounded-sm overflow-hidden">
+              <div @click="market_format = 'structured'"
+                class="flex p-1 justify-center  items-center w-full cursor-pointer" :class="{
+          'bg-purple-200 text-purple-700 cursor-auto select-none':
+            market_format == 'structured', 'bg-gray-100 flex': market_format == 'freeform'
+        }">Structured</div>
+              <div @click="market_format = 'freeform'"
+                class="flex p-1 justify-center w-full bg-gray-100  items-center cursor-pointer select-none" :class="{
+          'bg-purple-200 text-purple-700 w-full justify-center p-1 items-center flex cursor-auto':
+            market_format == 'freeform'
+        }">Free form</div>
+            </div>
           </div>
         </div>
         <div class="flex flex-col gap-4">
           <div class="flex flex-col custom-container gap-1 max-h-[300px] min-h-[2rem]">
             <label class="text-xs font-medium">Patent landscape:</label>
             <div class="bg-gray-100 overflow-scroll rounded-md text-sm p-2 flex-grow">
-              <p>{{ }}</p>
+
             </div>
           </div>
           <div class="flex flex-col custom-container gap-1">
             <label class="text-xs font-medium">SWOT:</label>
             <div class="rounded-md grid grid-rows-2 grid-cols-2 gap-4 custom-container">
               <div class="bg-gray-100 rounded-md p-2 flex-grow flex flex-col overflow-scroll gap-1 "
-                v-for="   category    in    swot_categories   ">
+                v-for="      category       in       swot_categories      ">
                 <p class="text-xs font-bold">{{ category }}</p>
-                <p class="text-xs" v-for="   element    in    swot[category]   ">- {{ element }}</p>
+                <p class="text-xs" v-for="      element       in       swot[category]      ">- {{ element }}</p>
               </div>
             </div>
 
@@ -125,41 +159,44 @@
 </template>
 
 <script setup>
+const market_format = ref('structured')
 const market_analysis = ref({
   0: {
     relevant_market: null,
     market_stats: null,
     dominant_actors: null,
     potential_customers: null,
+    freeform: null
   },
   1: {
     relevant_market: null,
     market_stats: null,
     dominant_actors: null,
     potential_customers: null,
+    freeform: null
   },
   2: {
     relevant_market: null,
     market_stats: null,
     dominant_actors: null,
     potential_customers: null,
+    freeform: null
   },
   3: {
     relevant_market: null,
     market_stats: null,
     dominant_actors: null,
     potential_customers: null,
+    freeform: null
   },
   4: {
     relevant_market: null,
     market_stats: null,
     dominant_actors: null,
     potential_customers: null,
+    freeform: null,
   },
 })
-
-
-
 
 const swot_categories = ['Strengths', 'Weaknesses', 'Opportunities', 'Threats']
 const use_case = ref('')
@@ -169,16 +206,74 @@ const swot = ref('')
 const description = ref('')
 const pending = ref(false)
 
-// watch(page, async (current_page) => {
-//   if (market_analysis.value[current_page].relevant_market == null) {
-//     market_analysis.value[current_page].relevant_market = await $fetch('/api/relevant_market', {
-//       method: 'POST',
-//       body: {
-//         "description": use_case.value.usecases[current_page].description
-//       }
-//     })
-//   }
-// })
+async function get_market_analysis() {
+  if (market_format.value == 'structured') {
+    await get_relevant_market(page.value)
+    await get_market_stats(page.value)
+    await get_dominant_actors(page.value)
+    await get_potential_customers(page.value)
+  }
+  else {
+    get_free_form(page.value)
+  }
+}
+
+
+async function get_free_form(current_page) {
+  market_analysis.value[current_page].freeform = await $fetch('/api/market_freeform', {
+    method: 'POST',
+    body: {
+      "description": use_case.value.usecases[current_page].description
+    }
+  })
+}
+
+async function get_market_stats(current_page) {
+  market_analysis.value[current_page].market_stats = await $fetch('/api/market_stats', {
+    method: 'POST',
+    body: {
+      "market": market_analysis.value[current_page].relevant_market
+    }
+  })
+}
+
+async function get_potential_customers(current_page) {
+  market_analysis.value[current_page].potential_customers = await $fetch('/api/potential_customers', {
+    method: 'POST',
+    body: {
+      "market": market_analysis.value[current_page].relevant_market,
+      "idea": use_case.value.usecases[current_page].description
+    }
+  })
+}
+
+async function get_dominant_actors(current_page) {
+  market_analysis.value[current_page].dominant_actors = await $fetch('/api/dominant_actors', {
+    method: 'POST',
+    body: {
+      "market": market_analysis.value[current_page].relevant_market
+    }
+  })
+}
+
+async function get_relevant_market(current_page) {
+  market_analysis.value[current_page].relevant_market = await $fetch('/api/relevant_market', {
+    method: 'POST',
+    body: {
+      "description": use_case.value.usecases[current_page].description
+    }
+  })
+}
+
+async function elaborate() {
+  console.log('elaborate on', use_case.value.usecases[page.value].description)
+  use_case.value.usecases[page.value].description = await $fetch('/api/elaborate', {
+    method: 'POST',
+    body: {
+      "description": use_case.value.usecases[page.value].description,
+    }
+  })
+}
 
 async function submit(input) {
   pending.value = true
@@ -188,35 +283,6 @@ async function submit(input) {
       "description": input.description,
     }
   })
-
-  // market_analysis.value.market_stats = await $fetch('/api/market_stats', {
-  //   method: 'POST',
-  //   body: {
-  //     "market": market_analysis.value.relevant_market
-  //   }
-  // })
-  // market_analysis.value.dominant_actors = await $fetch('/api/dominant_actors', {
-  //   method: 'POST',
-  //   body: {
-  //     "market": market_analysis.value.relevant_market
-  //   }
-  // })
-  // market_analysis.value.potential_customers = await $fetch('/api/potential_customers', {
-  //   method: 'POST',
-  //   body: {
-  //     "market": market_analysis.value.relevant_market,
-  //     "idea": input.description
-  //   }
-  // })
-  // swot.value = await $fetch('/api/swot', {
-  //   method: 'POST',
-  //   body: {
-  //     "description": input.description,
-  //     "market_analysis": market_analysis.value,
-  //     "usecase": use_case.value
-  //   }
-  // })
   pending.value = false
-  // console.log('success')
 }
 </script>

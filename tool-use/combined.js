@@ -61,10 +61,6 @@ const prompt = ChatPromptTemplate.fromMessages([
   ["placeholder", "{agent_scratchpad}"],
 ]);
 
-// const prompt = await pull(
-//   "hwchase17/openai-functions-agent"
-// );
-
 const llm = new ChatOpenAI({
   model: "gpt-4o",
   temperature: 0.8,

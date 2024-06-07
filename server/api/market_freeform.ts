@@ -6,12 +6,13 @@ import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_par
 const llm = new ChatOpenAI({model:'gpt-4o'
 , maxTokens: 400});
 
-const instruction = `Given a high level description, go more in to depth about exactly how this usecase works, what are potential customers, what need is it solving and what are next steps. Add <b> html tags around important words in each description to make them stand out. Don't use markdown just plain text`;
+const instruction = `Given a usecase, provide a detailed market analysis Please include total market size, CAGR and dominant players, if possible. Also, please include references for the data when possible. Don't use markdown just plain text. Max 300 tokens.
+`;
 
 
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", instruction],
-  ["user", "Description: {description}\n\nOutput: "],
+  ["user", "Usecase: {description}\n\nOutput: "],
 ]);
 
 const outputParser = new StringOutputParser();
