@@ -15,6 +15,7 @@ async function createAgent() {
     new ExaSearchResults({
       searchArgs: {
         numResults: 5,
+      
         text: {
           maxCharacters: 100,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
           includeHtmlTags: false, 
@@ -24,7 +25,7 @@ async function createAgent() {
     }),
   ];
   
-const instruction = `Given a market and a description of an idea, search the web and return the top 3 dominant actors and a link to each in json format.
+const instruction = `Given a market and a description of an idea, search the web and return the names of the top 3 biggest companies in that field.
 
 Market:  Outdoor recreation equipment
 Description: A modular, customizable solar-powered battery pack system designed for outdoor enthusiasts. This system allows users to connect multiple battery packs together to increase capacity as needed. Each battery pack module is equipped with high-efficiency solar panels, fast-charging capabilities, and a robust, water-resistant design. The system also includes a smart management unit that optimizes charging and discharging rates, monitors the health of each module, and provides real-time data to a connected mobile app.

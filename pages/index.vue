@@ -28,6 +28,7 @@
         </div> -->
       </div>
     </div>
+
     <div v-else class="w-full h-full flex flex-col gap-4 overflow-hidden">
       <div class="flex text-xs gap-2 items-center">
         <div>
@@ -62,7 +63,7 @@
             <div class="flex items-center gap-2">
               <label class="text-xs font-medium">Market analysis:</label>
               <div @click="get_market_analysis"
-                class="text-xs cursor-pointer hover:bg-purple-200 bg-purple-100 text-purple-500 p-1 rounded-sm">Fetch
+                class="text-xs cursor-pointer hover:bg-purple-200 bg-purple-100 text-purple-500 px-2 rounded-sm">Fetch
               </div>
             </div>
 
@@ -94,7 +95,7 @@
               </div>
               <div class="flex flex-col gap-1">
                 <label>Dominant actors: </label>
-                <a class="text-white bg-purple-500 p-1 rounded-sm hover:bg-purple-600"
+                <a class="text-blue-900 bg-blue-200 p-1 rounded-sm hover:bg-blue-300"
                   v-if="market_analysis[page].dominant_actors" :href="actor.link" target="_blank"
                   v-for="   actor    in    market_analysis[page].dominant_actors.top_3   ">
                   {{ actor.name }}
@@ -114,8 +115,8 @@
 
             </div>
             <div v-else class="bg-gray-100 overflow-scroll rounded-md flex flex-col text-xs p-2 gap-2 flex-grow">
-              <div v-if="market_analysis[page].freeform">{{
-          market_analysis[page].freeform }}
+              <div v-html="market_analysis[page].freeform
+          " v-if="market_analysis[page].freeform">
               </div>
               <div v-else class="text-gray-400">Click 'Fetch' to retrieve data</div>
             </div>
@@ -124,29 +125,41 @@
                 class="flex p-1 justify-center  items-center w-full cursor-pointer" :class="{
           'bg-purple-200 text-purple-700 cursor-auto select-none':
             market_format == 'structured', 'bg-gray-100 flex': market_format == 'freeform'
-        }">Structured</div>
+        }
+          ">Structured</div>
               <div @click="market_format = 'freeform'"
                 class="flex p-1 justify-center w-full bg-gray-100  items-center cursor-pointer select-none" :class="{
           'bg-purple-200 text-purple-700 w-full justify-center p-1 items-center flex cursor-auto':
             market_format == 'freeform'
-        }">Free form</div>
+        }
+          ">Free form</div>
             </div>
           </div>
         </div>
         <div class="flex flex-col gap-4">
           <div class="flex flex-col custom-container gap-1 max-h-[300px] min-h-[2rem]">
-            <label class="text-xs font-medium">Patent landscape:</label>
-            <div class="bg-gray-100 overflow-scroll rounded-md text-sm p-2 flex-grow">
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-medium">Patent landscape:</label>
+
+              <div @click="get_patents"
+                class="text-xs cursor-pointer hover:bg-purple-200 bg-purple-100 text-purple-500 px-2 rounded-sm">Fetch
+              </div>
+            </div>
+            <div class="bg-gray-100 overflow-scroll rounded-md p-2 flex-grow gap-2 flex flex-col text-xs ">
+
+              <a class="p-2 bg-blue-200 hover:bg-blue-300 text-blue-900 rounded-md cursor-pointer"
+                v-for=" patent  in  patents?.results " :href="patent.url" target="_blank">{{ patent.name
+                }}</a>
 
             </div>
           </div>
-          <div class="flex flex-col custom-container gap-1">
+          <div class=" flex flex-col custom-container gap-1">
             <label class="text-xs font-medium">SWOT:</label>
             <div class="rounded-md grid grid-rows-2 grid-cols-2 gap-4 custom-container">
               <div class="bg-gray-100 rounded-md p-2 flex-grow flex flex-col overflow-scroll gap-1 "
-                v-for="      category       in       swot_categories      ">
+                v-for="       category        in        swot_categories       ">
                 <p class="text-xs font-bold">{{ category }}</p>
-                <p class="text-xs" v-for="      element       in       swot[category]      ">- {{ element }}</p>
+                <p class="text-xs" v-for="       element        in        swot[category]       ">- {{ element }}</p>
               </div>
             </div>
 
@@ -154,7 +167,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -202,9 +214,20 @@ const swot_categories = ['Strengths', 'Weaknesses', 'Opportunities', 'Threats']
 const use_case = ref('')
 const page = ref(null)
 const swot = ref('')
+const patents = ref(null)
 // const name = ref('')
 const description = ref('')
 const pending = ref(false)
+
+async function get_patents() {
+  patents.value = await $fetch('/api/patent_search', {
+    method: 'POST',
+    body: {
+      "idea": description.value,
+      "usecase": use_case.value.usecases[page.value].description
+    }
+  })
+}
 
 async function get_market_analysis() {
   if (market_format.value == 'structured') {
@@ -277,7 +300,7 @@ async function elaborate() {
 
 async function submit(input) {
   pending.value = true
-  use_case.value = await $fetch('/api/use_cases', {
+  use_case.value = await $fetch('/api/use_cases_v2', {
     method: 'POST',
     body: {
       "description": input.description,

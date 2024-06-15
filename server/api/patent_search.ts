@@ -3,7 +3,6 @@ import * as dotenv from 'dotenv'
 dotenv.config(({path : '../.env'}))
 
 import { ExaSearchResults } from "@langchain/exa";
-import { TavilySearchResults } from '@langchain/community/tools/tavily_search';
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import Exa from "exa-js";
@@ -11,31 +10,35 @@ import { AgentExecutor, createOpenAIToolsAgent } from "langchain/agents";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers"
 
 async function createAgent() {
-  const searchTool = new TavilySearchResults({maxResults: 5, kwargs: { includeDomains: ['https://www.statista.com/']
-  } })
   const tools = [
-  searchTool
-  ]
-  // const tools = [
-  //   new ExaSearchResults({
-  //     searchArgs: {
-  //       type: 'keyword',
-  //       text: {
-  //         maxCharacters: 1000,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
-          
-  //         includeHtmlTags: false, 
-  //       },
-  //       numResults: 20,
-  //     },
-  //     client: new Exa(process.env.EXASEARCH_API_KEY),
-  //   }),
-  // ];
+    new ExaSearchResults({
+      searchArgs: {
+        type: 'neural',
+        text: {
+          maxCharacters: 100,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
+          includeHtmlTags: false, 
+        },
+        numResults: 5,
+        includeDomains: ['https://patents.google.com/']
+      },
+      client: new Exa(process.env.EXASEARCH_API_KEY),
+    }),
+  ];
   
-const instruction = `Given a usecase, search the web and put together a detailed market analysis (including market size, saturation, CAGR etc.). Provide links to the sources of the information. Links should be formatted as html anchor elements with a reference to the link as follows: [<a class='font-bold' href='url' target="_blank">source</a>] Don't use markdown, or headings (## or **) only plain text. Output should be more or less 400 tokens.`
+  const instruction = `Given an idea and a usecase search the web for top 3 most similar patents and their urls. The output should be in the following json format and the key results:
+
+  json{{
+    results: [{{
+      name: {{}},
+      url: {{}}
+    }},
+    ...]`
+ 
+const outputParser = new StringOutputParser();
 
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", instruction],
-  ["human", "Usecase: {usecase}\n\nOutput:\n\n"],
+  ["human", "Idea: {idea}\n\nUsecase: {usecase}\n\nOutput:\n\n"],
   ["placeholder", "{agent_scratchpad}"],
 ]);
 
@@ -46,7 +49,11 @@ const prompt = ChatPromptTemplate.fromMessages([
 const llm = new ChatOpenAI({
   model: "gpt-4o",
   temperature: 0.2,
-  maxTokens: 1000
+  modelKwargs: {
+    "response_format": { 
+      type: "json_object" 
+    }
+  }
   
 });
 
@@ -66,7 +73,7 @@ const agentExecutor = new AgentExecutor({
 }
 // Define the tools the agent will have access to.
 
-const outputParser = new StringOutputParser()
+const outputParser = new JsonOutputParser();
 
 
 export default defineEventHandler(async (event) => {
@@ -74,7 +81,8 @@ export default defineEventHandler(async (event) => {
   const agentExecutor = await createAgent()
   try {
     const response = await agentExecutor.invoke({
-      usecase: body.description,
+      idea: body.idea,
+      usecase: body.usecase
     });
     // console.log(response)
     return outputParser.parse(response.output)

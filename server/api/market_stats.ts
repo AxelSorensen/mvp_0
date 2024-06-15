@@ -17,6 +17,7 @@ async function createAgent() {
         numResults: 5,
         text: {
           maxCharacters: 100,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
+          
           includeHtmlTags: false, 
         },
       },
