@@ -11,27 +11,27 @@ import { AgentExecutor, createOpenAIToolsAgent } from "langchain/agents";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers"
 
 async function createAgent() {
-  const searchTool = new TavilySearchResults({maxResults: 5, kwargs: { includeDomains: ['https://www.statista.com/']
-  } })
-  const tools = [
-  searchTool
-  ]
+  // const searchTool = new TavilySearchResults({maxResults: 5, kwargs: { includeDomains: ['https://www.statista.com/']
+  // } })
   // const tools = [
-  //   new ExaSearchResults({
-  //     searchArgs: {
-  //       type: 'keyword',
-  //       text: {
-  //         maxCharacters: 1000,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
+  // searchTool
+  // ]
+  const tools = [
+    new ExaSearchResults({
+      searchArgs: {
+        type: 'keyword',
+        text: {
+          maxCharacters: 1000,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
           
-  //         includeHtmlTags: false, 
-  //       },
-  //       numResults: 20,
-  //     },
-  //     client: new Exa(process.env.EXASEARCH_API_KEY),
-  //   }),
-  // ];
+          includeHtmlTags: false, 
+        },
+        numResults: 5,
+      },
+      client: new Exa(process.env.EXASEARCH_API_KEY),
+    }),
+  ];
   
-const instruction = `Given a usecase, search the web and put together a detailed market analysis (including market size, saturation, CAGR etc.). Provide links to the sources of the information. Links should be formatted as html anchor elements with a reference to the link as follows: [<a class='font-bold' href='url' target="_blank">source</a>] Don't use markdown, or headings (## or **) only plain text. Output should be more or less 400 tokens.`
+const instruction = `Given a usecase, search the web and put together a detailed market analysis (including market size, saturation, CAGR, gaps etc.). Don't repeat yourself. After each sentence provide a link to the source of the information. Links should be formatted as html anchor elements with a reference to the link as follows: [<a class='font-bold' href='url' target="_blank">source</a>] Don't use markdown, or headings (## or **) only plain text. Output should be more or less 400 tokens.`
 
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", instruction],
