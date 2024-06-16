@@ -31,7 +31,7 @@ async function createAgent() {
     }),
   ];
   
-const instruction = `Given a usecase, search the web and put together a detailed market analysis (including market size, saturation, CAGR, gaps etc.). Don't repeat yourself. After each sentence provide a link to the source of the information. Links should be formatted as html anchor elements with a reference to the link as follows: [<a class='font-bold' href='url' target="_blank">source</a>] Don't use markdown, or headings (## or **) only plain text. Output should be more or less 400 tokens.`
+const instruction = `Given a usecase, search the web and put together a detailed market analysis (including market size, saturation, CAGR, gaps, barrier to entry, dominant actors, any important regulations etc.). Don't repeat yourself. After each sentence provide a link to the source of the information. Links should be formatted as html anchor elements with a reference to the link as follows: [<a class='font-bold' href='url' target="_blank">source</a>] Don't use markdown, or headings (## or **) only plain text. Output should be more or less 400 tokens.`
 
 const prompt = ChatPromptTemplate.fromMessages([
   ["system", instruction],
