@@ -2,7 +2,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
-import market_stats from "./market_stats";
 
 const llm = new ChatOpenAI({model:'gpt-4o'
 , maxTokens: 400, temperature: 0.2, modelKwargs: {

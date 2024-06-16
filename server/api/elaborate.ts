@@ -6,7 +6,7 @@ import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_par
 const llm = new ChatOpenAI({model:'gpt-4o'
 , maxTokens: 400});
 
-const instruction = `Given a high level description of a sector, go more in to depth about exactly what the usecase entails. Max 300 tokens`;
+const instruction = `Given a high level description of a usecase, go more in to depth about exactly what the usecase entails. Max 300 tokens`;
 
 
 const prompt = ChatPromptTemplate.fromMessages([
