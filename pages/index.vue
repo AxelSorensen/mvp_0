@@ -146,7 +146,6 @@
               </div>
             </div>
             <div class="bg-gray-100 overflow-scroll rounded-md p-2 flex-grow gap-2 flex flex-col text-xs ">
-
               <a class="p-2 bg-blue-200 hover:bg-blue-300 text-blue-900 rounded-md cursor-pointer"
                 v-for=" patent  in  patents?.results " :href="patent.url" target="_blank">{{ patent.name
                 }}</a>

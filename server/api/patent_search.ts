@@ -84,7 +84,7 @@ export default defineEventHandler(async (event) => {
       idea: body.idea,
       usecase: body.usecase
     });
-    // console.log(response)
+    console.log(response)
     return outputParser.parse(response.output)
   } catch (error) {
     console.error("Error invoking model:", error);
