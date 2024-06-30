@@ -21,7 +21,7 @@ async function createAgent() {
       searchArgs: {
         type: 'keyword',
         text: {
-          maxCharacters: 1000,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
+          maxCharacters: 100,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
           
           includeHtmlTags: false, 
         },

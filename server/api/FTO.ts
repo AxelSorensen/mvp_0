@@ -4,9 +4,9 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
 
 const llm = new ChatOpenAI({model:'gpt-4o'
-, maxTokens: 600});
+, maxTokens: 200});
 
-const instruction = `Given a high level description of a usecase and a description of an idea, explain in detail the painpoints and limitations of current methods, how the idea could improve these problems and what business opportunities the usecase provides. Be concrete and do not repeat information that has already been stated. IMPORTANT: Your responses should be plain text without formatting. Max 500 tokens.`;
+const instruction = `You are a business intelligence agent. Given a high level description of a usecase and a description of an idea, return a short and concise freedom to operate analysis based on what already exists. Don't use markdown, or headings (## or **) only plain text. Max 200 tokens. `;
 
 
 const prompt = ChatPromptTemplate.fromMessages([

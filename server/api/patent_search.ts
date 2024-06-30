@@ -25,7 +25,7 @@ async function createAgent() {
     }),
   ];
   
-  const instruction = `Given an idea and a usecase search the web for top 3 most similar patents and their urls. The output should be in the following json format and the key results:
+  const instruction = `Given an idea and a usecase search the web for top 3 (only 3) most similar patents and their urls. The output should be in the following json format and the key results:
 
   json{{
     results: [{{
@@ -84,7 +84,7 @@ export default defineEventHandler(async (event) => {
       idea: body.idea,
       usecase: body.usecase
     });
-    console.log(response)
+    // console.log(response)
     return outputParser.parse(response.output)
   } catch (error) {
     console.error("Error invoking model:", error);
