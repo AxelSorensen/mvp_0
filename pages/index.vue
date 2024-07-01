@@ -1,18 +1,94 @@
 <template>
-  <div @click.self="modal_open = false"
+  <div @click.self="modal_open = false; settings_open = false"
     class="absolute w-screen h-screen flex text-sm justify-center items-center p-8 z-10 bg-black bg-opacity-20"
     v-if="modal_open">
 
     <div class="bg-gray-100 p-8 rounded-md relative">
       <Icon @click="modal_open = false" name="heroicons:x-mark-16-solid"
         class="text-purple-500 cursor-pointer hover:text-purple-600 absolute right-3 top-3" size="1.5rem" />
-      <div v-html="modal_content" class="max-h-[70vh] max-w-[600px] text-sm overflow-scroll"></div>
+      <div v-if="!settings_open" v-html="modal_content" class="max-h-[70vh] max-w-[600px] text-sm overflow-scroll">
+      </div>
+      <div class="flex flex-col gap-4" v-else>
+        <div>
+          <p class="font-bold mb-2">Usecase</p>
+          <div class="flex gap-4 justify-between text-xs">
+            <p>Temperature (0-1)</p>
+            <input v-model.number="usecase_temp" type="text" class="rounded-sm bg-white p-1 w-16">
+          </div>
+        </div>
+        <div>
+          <p class="font-bold mb-2">Market</p>
+          <div class="flex flex-col gap-2 text-xs">
+            <div class="flex gap-4 justify-between">
+              <p>Search type</p>
+              <select class="h-6 rounded-sm outline-none" v-model="market_parameters.type">
+                <option disabled value="">Please select one</option>
+                <option>neural</option>
+                <option>keyword</option>
+              </select>
 
+            </div>
+            <div class="flex gap-4 justify-between">
+              <p>Temperature (0-1)</p>
+              <input v-model.number="market_parameters.temp" type="text" class="rounded-sm bg-white p-1 w-16">
+
+            </div>
+            <div class="flex gap-4 justify-between">
+              <p># of pages searched</p>
+              <input v-model.number="market_parameters.pages" type="text" class="rounded-sm bg-white p-1 w-16">
+
+            </div>
+            <div class="flex gap-4 justify-between">
+              <p>Characters extracted (per source)</p>
+              <input v-model.number="market_parameters.characters" type="text" class="rounded-sm bg-white p-1 w-16">
+
+            </div>
+
+          </div>
+        </div>
+        <div>
+
+          <p class="font-bold mb-2">Patent</p>
+          <div class="flex flex-col gap-2 text-xs">
+            <div class="flex gap-4 justify-between">
+              <p>Search type</p>
+              <select class="h-6 rounded-sm outline-none" v-model="patent_parameters.type">
+                <option disabled value="">Please select one</option>
+                <option>neural</option>
+                <option>keyword</option>
+              </select>
+
+            </div>
+            <div class="flex gap-4 justify-between">
+              <p>Temperature (0-1)</p>
+              <input v-model.number="patent_parameters.temp" type="text" class="rounded-sm bg-white p-1 w-16">
+
+            </div>
+            <div class="flex gap-4 justify-between">
+              <p># of pages searched</p>
+              <input v-model.number="patent_parameters.pages" type="text" class="rounded-sm bg-white p-1 w-16">
+
+            </div>
+            <div class="flex gap-4 justify-between">
+              <p>Characters extracted (per source)</p>
+              <input v-model.number="patent_parameters.characters" type="text" class="rounded-sm bg-white p-1 w-16">
+
+            </div>
+          </div>
+        </div>
+        <button @click="resetSettings" class="bg-gray-200 mt-4 text-xs hover:bg-gray-300 p-1 rounded-sm">Reset to
+          default</button>
+
+
+      </div>
     </div>
+
   </div>
   <div class="grid grid-rows-[auto,1fr] items-center h-screen p-8">
     <div class="flex flex-col w-full h-full gap-4">
       <h1 class="text-lg w-full text-center font-medium">AI Business Development</h1>
+      <Icon @click="openModal()" name="heroicons:cog-6-tooth-16-solid"
+        class="text-gray-400 cursor-pointer hover:text-purple-600 absolute mr-8 right-0" size="1.5rem" />
       <div class="flex gap-1 flex-col justify-between">
         <label class="text-xs text-gray-600">Description:</label>
         <textarea type="text" class="bg-gray-100 p-2 rounded-md w-full text-sm" v-model="description"
@@ -210,7 +286,7 @@
                 </div>
               </div>
               <a v-else class="p-2 bg-blue-200 hover:bg-blue-300 text-blue-900 rounded-md cursor-pointer"
-                v-for=" patent  in  patents?.results " :href="patent.url" target="_blank">{{ patent.name
+                v-for=" patent  in  patents?.[page]?.results " :href="patent.url" target="_blank">{{ patent.name
                 }}</a>
 
             </div>
@@ -238,6 +314,20 @@ const loading = ref({ market: false, usecase: false, patent: false, elaborate: f
 const old_usecases = ref([])
 const modal_open = ref(false)
 const modal_content = ref('')
+const usecase_temp = ref(0.2)
+const market_parameters = ref({
+  temp: 0.2,
+  type: 'neural',
+  pages: 5,
+  characters: 500
+})
+const patent_parameters = ref({
+  temp: 0.2,
+  type: 'neural',
+  pages: 5,
+  characters: 500
+})
+
 // const market_format = ref('structured')
 const market_analysis = ref({
   0: {
@@ -281,18 +371,19 @@ const swot_categories = ['Strengths', 'Weaknesses', 'Opportunities', 'Threats']
 const use_case = ref('')
 const page = ref(null)
 const swot = ref('')
-const patents = ref(null)
+const patents = ref({})
 // const name = ref('')
 const description = ref('')
-
+const settings_open = ref(false)
 
 async function get_patents() {
   loading.value.patents = true
-  patents.value = await $fetch('/api/patent_search', {
+  patents.value[page.value] = await $fetch('/api/patent_search', {
     method: 'POST',
     body: {
       "idea": description.value,
-      "usecase": use_case.value.usecases[page.value].description
+      "usecase": use_case.value.usecases[page.value].description,
+      "parameters": patent_parameters.value
     }
   })
   loading.value.patents = false
@@ -314,10 +405,13 @@ function openModal(content) {
   if (content != null) {
     modal_content.value = content
     modal_open.value = true
-
+  } else {
+    modal_open.value = true
+    settings_open.value = true
   }
 
 }
+
 
 
 async function get_free_form(current_page) {
@@ -325,7 +419,8 @@ async function get_free_form(current_page) {
   market_analysis.value[current_page].freeform = await $fetch('/api/market_freeform', {
     method: 'POST',
     body: {
-      "description": use_case.value.usecases[current_page].description
+      "description": use_case.value.usecases[current_page].description,
+      "parameters": market_parameters.value
     }
   })
   loading.value.market = false
@@ -338,6 +433,18 @@ async function get_market_stats(current_page) {
       "market": market_analysis.value[current_page].relevant_market
     }
   })
+}
+
+function resetSettings() {
+  usecase_temp.value = 0.2
+  market_parameters.value.temp = 0.2
+  market_parameters.value.type = 'neural'
+  market_parameters.value.pages = 5
+  market_parameters.value.characters = 500
+  patent_parameters.value.temp = 0.2
+  patent_parameters.value.type = 'neural'
+  patent_parameters.value.pages = 5
+  patent_parameters.value.characters = 500
 }
 
 async function get_potential_customers(current_page) {
@@ -387,6 +494,7 @@ async function submit() {
     method: 'POST',
     body: {
       "description": description.value,
+      "usecase_temp": usecase_temp.value
     }
   })
   loading.value.usecase = false

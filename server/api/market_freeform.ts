@@ -10,7 +10,7 @@ import Exa from "exa-js";
 import { AgentExecutor, createOpenAIToolsAgent } from "langchain/agents";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers"
 
-async function createAgent() {
+async function createAgent(parameters) {
   // const searchTool = new TavilySearchResults({maxResults: 5, kwargs: { includeDomains: ['https://www.statista.com/']
   // } })
   // const tools = [
@@ -19,13 +19,13 @@ async function createAgent() {
   const tools = [
     new ExaSearchResults({
       searchArgs: {
-        type: 'keyword',
+        type: parameters.type,
         text: {
-          maxCharacters: 100,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
+          maxCharacters: parameters.characters,  // Max characters for text content scraped from each page (tradeoff between finding right answer and using many tokens)
           
           includeHtmlTags: false, 
         },
-        numResults: 5,
+        numResults: parameters.pages,
       },
       client: new Exa(process.env.EXASEARCH_API_KEY),
     }),
@@ -45,9 +45,8 @@ const prompt = ChatPromptTemplate.fromMessages([
 
 const llm = new ChatOpenAI({
   model: "gpt-4o",
-  temperature: 0.2,
+  temperature: parameters.temp,
   maxTokens: 1000
-  
 });
 
 const agent = await createOpenAIToolsAgent({
@@ -71,7 +70,7 @@ const outputParser = new StringOutputParser()
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const agentExecutor = await createAgent()
+  const agentExecutor = await createAgent(body.parameters)
   try {
     const response = await agentExecutor.invoke({
       usecase: body.description,
